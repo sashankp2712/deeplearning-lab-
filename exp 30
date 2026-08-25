@@ -1,0 +1,109 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report,
+    confusion_matrix
+)
+
+# Load Iris dataset
+iris = load_iris()
+
+# Create DataFrame
+data = pd.DataFrame(
+    iris.data,
+    columns=iris.feature_names
+)
+
+# Add target column
+data['Target'] = iris.target
+
+# Separate features and target
+X = data.drop('Target', axis=1)
+y = data['Target']
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.30,
+    random_state=1,
+    stratify=y
+)
+
+# Feature scaling
+scaler = StandardScaler()
+
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Create Logistic Regression model
+model = LogisticRegression(max_iter=1000)
+
+# Train the model
+model.fit(X_train, y_train)
+
+# Predict test data
+y_pred = model.predict(X_test)
+
+# Performance measures
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(
+    y_test, y_pred, average='weighted'
+)
+recall = recall_score(
+    y_test, y_pred, average='weighted'
+)
+f1 = f1_score(
+    y_test, y_pred, average='weighted'
+)
+
+print("Logistic Regression Performance")
+print("--------------------------------")
+print("Accuracy :", round(accuracy, 2))
+print("Precision:", round(precision, 2))
+print("Recall   :", round(recall, 2))
+print("F1 Score :", round(f1, 2))
+
+# Classification Report
+print("\nClassification Report:")
+print(
+    classification_report(
+        y_test,
+        y_pred,
+        target_names=iris.target_names
+    )
+)
+
+# Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+
+print("Confusion Matrix:")
+print(cm)
+
+# Plot Confusion Matrix
+plt.figure(figsize=(7, 5))
+
+sns.heatmap(
+    cm,
+    annot=True,
+    fmt='d',
+    cmap='Oranges',
+    xticklabels=iris.target_names,
+    yticklabels=iris.target_names
+)
+
+plt.xlabel("Predicted Label")
+plt.ylabel("True Label")
+plt.title("Logistic Regression - Iris Dataset")
+
+plt.show()
