@@ -1,0 +1,86 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+# Load Wine dataset
+wine = load_wine()
+
+# Create DataFrame
+data = pd.DataFrame(
+    wine.data,
+    columns=wine.feature_names
+)
+
+# Add target column
+data['Target'] = wine.target
+
+# Separate features and target
+X = data.drop('Target', axis=1)
+y = data['Target']
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.30,
+    random_state=1,
+    stratify=y
+)
+
+# Create a Decision Tree with high depth
+# High complexity can cause overfitting
+model = DecisionTreeClassifier(
+    max_depth=None,
+    random_state=1
+)
+
+# Train the model
+model.fit(X_train, y_train)
+
+# Calculate training and testing accuracy
+train_accuracy = model.score(X_train, y_train)
+test_accuracy = model.score(X_test, y_test)
+
+print("Training Accuracy:", round(train_accuracy, 2))
+print("Testing Accuracy:", round(test_accuracy, 2))
+
+# Check for overfitting
+if train_accuracy > test_accuracy:
+    print("\nThe model shows signs of overfitting.")
+else:
+    print("\nThe model does not show significant overfitting.")
+
+# Compare training and testing accuracy
+accuracy_data = {
+    'Dataset': ['Training Data', 'Testing Data'],
+    'Accuracy': [train_accuracy, test_accuracy]
+}
+
+accuracy_df = pd.DataFrame(accuracy_data)
+
+# Plot accuracy
+plt.figure(figsize=(7, 5))
+
+plt.bar(
+    accuracy_df['Dataset'],
+    accuracy_df['Accuracy']
+)
+
+plt.ylim(0, 1.1)
+plt.xlabel("Dataset")
+plt.ylabel("Accuracy")
+plt.title("Training vs Testing Accuracy - Overfitting Analysis")
+
+# Display accuracy values
+for i, value in enumerate(accuracy_df['Accuracy']):
+    plt.text(
+        i,
+        value + 0.02,
+        f"{value:.2f}",
+        ha='center'
+    )
+
+plt.show()
